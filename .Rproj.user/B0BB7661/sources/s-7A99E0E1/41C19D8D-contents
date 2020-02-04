@@ -1,0 +1,83 @@
+library(data.table)
+library(lubridate)
+library(Hmisc)
+
+setwd("D:/UZH/Vorlesung/2020 FS/R/data/")
+
+data1 <- fread("D:/UZH/Vorlesung/2020 FS/R/data/transactions.csv")
+
+data1[, TransDate:=dmy(TransDate, tz="UTC")]
+
+data1[,SUMedPurch:=sum(PurchAmount),by=list(Customer, TransDate)]
+data1
+
+data1[,TransactionCount:=.N,by=Customer]
+data1
+
+data1[,LeadShifted:=shift(TransDate,type="lead"),by=Customer]
+data1
+
+Customerdata <- fread("D:/UZH/Vorlesung/2020 FS/R/data/demographics.csv")
+str(Customerdata)
+Customerdata[, Birthdate:=dmy(Birthdate, tz="UTC")]
+
+MergedVar <- merge(data1,Customerdata,by="Customer",all=FALSE)[year(Birthdate) >= 1980,]
+
+
+CumulativeSales <- sum(data1[TransDate>ymd("2012-11-30", tz="UTC"),PurchAmount])
+
+if(CumulativeSales>45000){
+  print("do not start a campaign")
+} else if(CumulativeSales<45000 & CumulativeSales>30000){
+  print("a free item for every 3 items bought")
+} else {
+  print("10% discount on all products for the next weekend")
+}
+
+sumtrans <- 0
+count <- 0
+while (sumtrans<1000000){
+ count <- count+1
+ sumtrans <- sumtrans + transac
+}
+
+division <- function(a,b){
+  result_div <- a/b
+  return(result_div)
+}
+
+
+dices <- function(dice1,dice2){
+  dice1 <- sample(1:6, 1)
+  dice2 <- sample(1:6, 1)
+  result_dices=sum(dice1,dice2)
+  return(result_dices)
+}
+
+max.Date <- max(data1[,TransDate])
+
+rfm <- data1[,list(
+            recency = as.numeric(difftime(max.Date,max(TransDate))),
+            frequency = .N,
+            monetary = mean(PurchAmount),
+            by=Customer)
+]
+str(rfm)
+
+rfm_scores <- rfm[,list(Customer,
+                        recency = as.numeric(cut2(-recency, g=3)),
+                        frequency = as.numeric(cut2(frequency, g=3)),
+                        monetary = as.numeric(cut2(monetary, g=3))
+)]
+str(rfm_scores)
+
+rfmfunction <- function(w_recency, w_frequency, w_monetary){
+  rfm <- data1[,list(
+    recency = as.numeric(difftime(max.Date,max(TransDate))),
+    frequency = .N,
+    monetary = mean(PurchAmount),
+    by=Customer)
+    ]
+  str(rfm)
+  
+}
